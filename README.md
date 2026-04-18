@@ -1,82 +1,126 @@
-# 📦 Microservicio de Reservas
+# 🏨 Hotel Booking Service (Microservicio de Reservas)
 
-El **Microservicio de Reservas** expone endpoints para consultar información de reservas a través de una API REST.
+Microservicio empresarial desarrollado con **Spring Boot 3.3.0** y **Oracle Database Cloud**, diseñado para gestionar reservas de hotel.
 
-Actualmente el servicio implementa **únicamente controladores de tipo `GET`**, destinados a la consulta de datos.  
-Todas las respuestas del servicio se entregan en **formato JSON**.
+## 🛠️ Tecnologías y Herramientas
 
----
-
-## 🚀 Funcionalidades disponibles
-
-El microservicio ofrece **tres endpoints principales**:
-
-### 1️⃣ Listar todas las reservas
-
-Permite obtener la lista completa de reservas registradas en el sistema.
-
-**Endpoint**
-
-```http
-GET /api/reservations
-```
-
-**URL de prueba**
-
-```
-http://localhost:8080/api/reservations
-```
-
-**Respuesta**
-
-Retorna un **JSON con los 8 registros completos de reservas** almacenadas.
+- **Framework:** Spring Boot 3.3.0 (Java 17)
+- **Persistencia:** Spring Data JPA con **Oracle JDBC 21.9.0.0**
+- **Base de Datos:** Oracle Cloud Autonomous Database (Conexión vía Wallet)
+- **Seguridad:** Spring Security (Basic Authentication & CORS)
+- **Validación:** Jakarta Bean Validation (Hibernate Validator)
+- **Utilidades:** Lombok y SLF4J (Logging)
 
 ---
 
-### 2️⃣ Consultar disponibilidad
+## 🏗️ Arquitectura del Proyecto
 
-Permite obtener únicamente las reservas que se encuentran activas.
+El proyecto sigue una arquitectura de capas, separando las responsabilidades de forma clara:
 
-**Endpoint**
-
-```http
-GET /api/reservations/availability
-```
-
-**URL de prueba**
-
-```
-http://localhost:8080/api/reservations/availability
-```
-
-**Respuesta**
-
-Retorna un **JSON filtrado con las reservas cuyo estado es `"ACTIVA"`**.
+1.  **DTO (Data Transfer Objects):** Capa encargada de la comunicación externa y validación de entrada. Evita la exposición directa de las entidades de base de datos.
+2.  **Controller:** Capa de presentación que expone los endpoints RESTful.
+3.  **Service:** Capa de lógica de negocio y mapeo entre DTOs y Entidades.
+4.  **Repository:** Capa de persistencia que interactúa con las tablas de Oracle.
+5.  **Exception Handling:** Manejador global de excepciones que estandariza las respuestas de error en formato JSON.
 
 ---
 
-### 3️⃣ Buscar reserva por ID
+## 🔐 Seguridad y Autenticación
 
-Permite consultar la información de una reserva específica utilizando su identificador.
+Todos los endpoints están protegidos mediante **Basic Auth**.
 
-**Endpoint**
-
-```http
-GET /api/reservations/{id}
-```
-
-**URL de prueba**
-
-```
-http://localhost:8080/api/reservations/1
-```
-
-**Respuesta**
-
-Retorna un **JSON con los datos detallados de la reserva correspondiente al ID solicitado**.
+- **Usuario:** `hotelbooking`
+- **Contraseña:** `SumativasFullStack2026`
 
 ---
 
-## 📄 Formato de respuesta
+## 📡 Endpoints de la API
 
-Todos los endpoints devuelven respuestas en **formato JSON**.
+| Método | Endpoint | Descripción | Requiere Body |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/reservations` | Listar todas las reservas | No |
+| **GET** | `/api/reservations/availability` | Consultar reservas activas | No |
+| **GET** | `/api/reservations/{id}` | Buscar reserva por ID | No |
+| **POST** | `/api/reservations` | Crear nueva reserva (Usa DTO) | Sí |
+| **PUT** | `/api/reservations/{id}` | Actualizar reserva existente | Sí |
+| **DELETE** | `/api/reservations/{id}` | Eliminar una reserva | No |
+
+### Ejemplo de JSON para POST/PUT:
+```json
+{
+    "hotelId": 1,
+    "guestName": "Juan Perez",
+    "roomType": "Suite Premium",
+    "checkInDate": "2026-12-31",
+    "checkOutDate": "2027-01-05",
+    "status": "ACTIVE",
+    "paymentMethod": "CARD"
+}
+```
+
+---
+
+## ⚙️ Configuración de Base de Datos
+
+El microservicio utiliza una **Oracle Wallet** para la conexión segura.
+- **Ubicación:** Configurada en `application.properties` mediante la propiedad `TNS_ADMIN`.
+- **Estructura:** Las tablas `HOTELS` y `RESERVATIONS` deben ser creadas previamente con el script SQL proporcionado.
+
+## Script SQL de creación y carga inicial
+
+```sql
+-- ==========================================================
+-- SCRIPT DE CREACIÓN Y CARGA INICIAL - HOTEL BOOKING SERVICE
+-- ==========================================================
+
+-- 1. Limpieza de tablas existentes (evitar conflictos)
+DROP TABLE RESERVATIONS CASCADE CONSTRAINTS;
+DROP TABLE HOTELS CASCADE CONSTRAINTS;
+
+-- 2. Creación de la tabla de Hoteles
+CREATE TABLE HOTELS (
+    ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    NAME VARCHAR2(100) NOT NULL,
+    LOCATION VARCHAR2(100) NOT NULL,
+    CATEGORY VARCHAR2(50)
+);
+
+-- 3. Creación de la tabla de Reservas
+-- Relacionada con la tabla de Hoteles mediante HOTEL_ID
+CREATE TABLE RESERVATIONS (
+    ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    HOTEL_ID NUMBER,
+    GUEST_NAME VARCHAR2(100) NOT NULL,
+    ROOM_TYPE VARCHAR2(50) NOT NULL,
+    CHECK_IN_DATE DATE NOT NULL,
+    CHECK_OUT_DATE DATE NOT NULL,
+    STATUS VARCHAR2(20) DEFAULT 'ACTIVE',
+    PAYMENT_METHOD VARCHAR2(20),
+    CONSTRAINT FK_HOTEL FOREIGN KEY (HOTEL_ID) REFERENCES HOTELS(ID)
+);
+
+-- 4. Inserción de 3 registros en HOTELS
+INSERT INTO HOTELS (NAME, LOCATION, CATEGORY) VALUES ('Hotel Plaza', 'Santiago', '5 Estrellas');
+INSERT INTO HOTELS (NAME, LOCATION, CATEGORY) VALUES ('Hotel Central', 'Viña del Mar', '4 Estrellas');
+INSERT INTO HOTELS (NAME, LOCATION, CATEGORY) VALUES ('Hotel Estelar', 'Concepción', '3 Estrellas');
+
+-- 5. Inserción de 3 registros en RESERVATIONS
+INSERT INTO RESERVATIONS (HOTEL_ID, GUEST_NAME, ROOM_TYPE, CHECK_IN_DATE, CHECK_OUT_DATE, STATUS, PAYMENT_METHOD) 
+VALUES (1, 'Juan Perez', 'Suite', TO_DATE('2026-05-01','YYYY-MM-DD'), TO_DATE('2026-05-05','YYYY-MM-DD'), 'ACTIVE', 'CARD');
+
+INSERT INTO RESERVATIONS (HOTEL_ID, GUEST_NAME, ROOM_TYPE, CHECK_IN_DATE, CHECK_OUT_DATE, STATUS, PAYMENT_METHOD) 
+VALUES (2, 'Maria Gomez', 'Double', TO_DATE('2026-04-20','YYYY-MM-DD'), TO_DATE('2026-04-25','YYYY-MM-DD'), 'ACTIVE', 'CASH');
+
+INSERT INTO RESERVATIONS (HOTEL_ID, GUEST_NAME, ROOM_TYPE, CHECK_IN_DATE, CHECK_OUT_DATE, STATUS, PAYMENT_METHOD) 
+VALUES (3, 'Carlos Diaz', 'Single', TO_DATE('2026-06-10','YYYY-MM-DD'), TO_DATE('2026-06-12','YYYY-MM-DD'), 'ACTIVE', 'TRANSFER');
+
+COMMIT;
+```
+
+---
+
+## 🚀 Ejecución del Proyecto
+
+1. Tener configurada la ruta de la Wallet de Oracle en el equipo.
+
+---
