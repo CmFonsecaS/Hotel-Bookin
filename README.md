@@ -1,6 +1,6 @@
 # 🏨 Hotel Booking Service (Microservicio de Reservas)
 
-Microservicio empresarial desarrollado con **Spring Boot 3.3.0** y **Oracle Database Cloud**, diseñado para gestionar reservas de hotel.
+Microservicio desarrollado con **Spring Boot 3.3.0** y **Oracle Database Cloud**, diseñado para gestionar reservas de hotel.
 
 ## 🛠️ Tecnologías y Herramientas
 
