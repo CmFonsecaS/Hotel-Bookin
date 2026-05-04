@@ -23,21 +23,21 @@ public class ReservationService {
         this.hotelRepository = hotelRepository;
     }
 
-    public List<Reservation> getAllReservations() {
+    public List<ReservationDTO> getAllReservations() {
         log.info("Obteniendo todas las reservas");
-        return reservationRepository.findAll();
+        return reservationRepository.findAll().stream().map(this::mapToDTO).toList();
     }
 
-    public List<Reservation> getAvailableReservations() {
+    public List<ReservationDTO> getAvailableReservations() {
         log.info("Consultando disponibilidad");
-        return reservationRepository.findByStatus("ACTIVE");
+        return reservationRepository.findByStatus("ACTIVE").stream().map(this::mapToDTO).toList();
     }
 
-    public Optional<Reservation> getReservationById(Long id) {
-        return reservationRepository.findById(id);
+    public Optional<ReservationDTO> getReservationById(Long id) {
+        return reservationRepository.findById(id).map(this::mapToDTO);
     }
 
-    public Reservation createReservation(ReservationDTO dto) {
+    public ReservationDTO createReservation(ReservationDTO dto) {
         log.info("Creando reserva desde DTO para: {}", dto.getGuestName());
         
         Hotel hotel = hotelRepository.findById(dto.getHotelId())
@@ -53,10 +53,10 @@ public class ReservationService {
                 .paymentMethod(dto.getPaymentMethod())
                 .build();
 
-        return reservationRepository.save(reservation);
+        return mapToDTO(reservationRepository.save(reservation));
     }
 
-    public Optional<Reservation> updateReservation(Long id, ReservationDTO dto) {
+    public Optional<ReservationDTO> updateReservation(Long id, ReservationDTO dto) {
         log.info("Actualizando reserva ID: {} desde DTO", id);
         
         return reservationRepository.findById(id).map(existing -> {
@@ -71,7 +71,7 @@ public class ReservationService {
             existing.setStatus(dto.getStatus());
             existing.setPaymentMethod(dto.getPaymentMethod());
             
-            return reservationRepository.save(existing);
+            return mapToDTO(reservationRepository.save(existing));
         });
     }
 
@@ -80,5 +80,19 @@ public class ReservationService {
             reservationRepository.delete(res);
             return true;
         }).orElse(false);
+    }
+
+    private ReservationDTO mapToDTO(Reservation reservation) {
+        ReservationDTO dto = ReservationDTO.builder()
+                .id(reservation.getId())
+                .hotelId(reservation.getHotel() != null ? reservation.getHotel().getId() : null)
+                .guestName(reservation.getGuestName())
+                .roomType(reservation.getRoomType())
+                .checkInDate(reservation.getCheckInDate())
+                .checkOutDate(reservation.getCheckOutDate())
+                .status(reservation.getStatus())
+                .paymentMethod(reservation.getPaymentMethod())
+                .build();
+        return dto;
     }
 }
