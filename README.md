@@ -124,3 +124,54 @@ COMMIT;
 1. Tener configurada la ruta de la Wallet de Oracle en el equipo.
 
 ---
+
+# Actividad Sumativa 3: Generando un microservicio de calidad y con documentación
+
+---
+
+## 🚀 Pruebas Unitarias (Testing)
+
+El proyecto incluye pruebas unitarias automatizadas desarrolladas con **JUnit 5** y **Mockito** para garantizar la fiabilidad de la lógica de negocio aislando la base de datos.
+- **Ubicación:** `src/test/java/.../service/ReservationServiceTest.java`
+- **Ejecución:**
+  ```bash
+  ./mvnw test
+  ```
+
+---
+
+## 🔗 Nivel de Madurez REST (HATEOAS)
+
+La API cuenta con documentación auto-generada e incrustada en las respuestas JSON gracias a **Spring HATEOAS**. 
+Las respuestas retornan objetos que incluyen un bloque `_links` que provee URLs dinámicas (como `self` o `all-reservations`), facilitando la navegación y la interacción desde aplicaciones cliente.
+
+---
+
+## 🐳 Despliegue en Cloud (Dockerización)
+
+El microservicio está preparado para ser desplegado en la nube (como Docker Lab) mediante un entorno contenerizado. Utiliza un proceso de construcción *multi-stage* que compila el código y empaca la Oracle Wallet automáticamente.
+
+### Ejecución con Docker (Recomendado)
+
+1.  Asegúrate de tener la carpeta de la Wallet (`Wallet_MIDBDUOC`) en la raíz del proyecto.
+2.  Construye la imagen Docker:
+    ```bash
+    docker build -t hotel-booking-service .
+    ```
+3.  Levanta el contenedor (o usa `docker-compose up -d`):
+    ```bash
+    docker run -p 8081:8080 hotel-booking-service
+    ```
+
+### Ejecución Local
+
+1.  Compilar el proyecto:
+    ```bash
+    ./mvnw clean compile
+    ```
+2.  Iniciar la aplicación (la Wallet local debe estar configurada en `application.properties`):
+    ```bash
+    ./mvnw spring-boot:run
+    ```
+
+---
