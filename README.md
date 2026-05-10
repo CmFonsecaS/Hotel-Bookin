@@ -119,16 +119,6 @@ COMMIT;
 
 ---
 
-## 🚀 Ejecución del Proyecto
-
-1. Tener configurada la ruta de la Wallet de Oracle en el equipo.
-
----
-
-# Actividad Sumativa 3: Generando un microservicio de calidad y con documentación
-
----
-
 ## 🚀 Pruebas Unitarias (Testing)
 
 El proyecto incluye pruebas unitarias automatizadas desarrolladas con **JUnit 5** y **Mockito** para garantizar la fiabilidad de la lógica de negocio aislando la base de datos.
@@ -137,6 +127,12 @@ El proyecto incluye pruebas unitarias automatizadas desarrolladas con **JUnit 5*
   ```bash
   ./mvnw test
   ```
+
+### Pruebas de Negocio:
+- `testGetAllReservations()`: Prueba que lista las reservas.
+- `testCreateReservation()`: Prueba que crea una reserva usando DTO.
+- `testGetReservationById()`: Prueba que busca una reserva específica por su ID.
+- `testDeleteReservation()`: Prueba que elimina una reserva.
 
 ---
 
@@ -175,3 +171,4 @@ El microservicio está preparado para ser desplegado en la nube (como Docker Lab
     ```
 
 ---
+*Desarrollado para el proyecto final de Integración de Sistemas y Bases de Datos.*

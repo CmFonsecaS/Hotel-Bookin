@@ -96,4 +96,33 @@ class ReservationServiceTest {
         verify(hotelRepository, times(1)).findById(1L);
         verify(reservationRepository, times(1)).save(any(Reservation.class));
     }
+
+    @Test
+    void testGetReservationById() {
+        // Arrange
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(sampleReservation));
+
+        // Act
+        Optional<ReservationDTO> result = reservationService.getReservationById(1L);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals("John Doe", result.get().getGuestName());
+        verify(reservationRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void testDeleteReservation() {
+        // Arrange
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(sampleReservation));
+        doNothing().when(reservationRepository).delete(sampleReservation);
+
+        // Act
+        boolean result = reservationService.deleteReservation(1L);
+
+        // Assert
+        assertTrue(result);
+        verify(reservationRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).delete(sampleReservation);
+    }
 }
